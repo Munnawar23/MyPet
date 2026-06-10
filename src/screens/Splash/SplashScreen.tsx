@@ -1,29 +1,19 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React from "react";
+import { View, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import LottieView from "lottie-react-native";
-import { verticalScale, scale } from "react-native-size-matters";
+import { verticalScale } from "react-native-size-matters";
 import { theme } from "@/styles/theme";
-import { wp, hp } from "@/helpers/dimensionHelpers";
+import { wp } from "@/helpers/dimensionHelpers";
 import { RootStackParamList } from "@/navigation/RootNavigator";
-
-import { storage, StorageKeys } from "@/utils/storage";
+import LoaderBar from "./components/LoaderBar";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
 export default function SplashScreen() {
   const navigation = useNavigation<NavigationProp>();
   const S = createStyles();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // TODO: Remove for production — always show Onboarding for testing
-      navigation.replace("Onboarding");
-    }, 2500);
-
-    return () => clearTimeout(timer);
-  }, [navigation]);
 
   return (
     <View style={S.container}>
@@ -35,7 +25,7 @@ export default function SplashScreen() {
           style={S.lottieAnimation}
         />
       </View>
-      <Text style={S.title}>My Pet</Text>
+      <LoaderBar onComplete={() => navigation.replace("Onboarding")} duration={3000} />
     </View>
   );
 }
@@ -44,7 +34,7 @@ const createStyles = () =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.accent,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -59,11 +49,6 @@ const createStyles = () =>
       width: "100%",
       height: "100%",
     },
-    title: {
-      fontFamily: theme.fontFamily.heading,
-      fontSize: theme.fontSize.display || scale(40),
-      color: theme.colors.text,
-      textAlign: "center",
-      letterSpacing: scale(1),
-    },
   });
+
+

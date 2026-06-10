@@ -13,7 +13,7 @@ import LottieView from 'lottie-react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { theme } from '@/styles/theme';
 import { Settings, Utensils, Moon, Smile as SmileIcon } from 'lucide-react-native';
-import CompactStatsBar from '@/components/CompactStatsBar';
+import StatBar from './Components/StatBar';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import ActionButton from './Components/ActionButton';
 
@@ -65,7 +65,7 @@ export default function HomeScreen() {
       <View style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         {/* Top HUD */}
         <View style={styles.topHUD}>
-          <CompactStatsBar
+          <StatBar
             hunger={hunger}
             energy={energy}
             happiness={happiness}

@@ -42,7 +42,7 @@ const MiniProgressBar = ({ progress, color, icon }: StatProps) => {
   );
 };
 
-interface CompactStatsBarProps {
+interface StatBarProps {
   hunger: number;
   energy: number;
   happiness: number;
@@ -51,14 +51,14 @@ interface CompactStatsBarProps {
   happinessIcon: React.ReactNode;
 }
 
-export default function CompactStatsBar({
+export default function StatBar({
   hunger,
   energy,
   happiness,
   hungerIcon,
   energyIcon,
   happinessIcon,
-}: CompactStatsBarProps) {
+}: StatBarProps) {
   return (
     <View style={styles.container}>
       <MiniProgressBar progress={hunger} color={theme.colors.accent} icon={hungerIcon} />
