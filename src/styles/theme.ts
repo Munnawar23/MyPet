@@ -1,20 +1,32 @@
 import { moderateScale } from "react-native-size-matters";
 
 export const colors = {
-  // Core UI Colors
-  background: "#EFF9FF", // A very light, airy sky blue
-  card: "#FFFFFF",       // Clean, crisp white for modals and cards
-  text: "#4A3F35",       // A deep, warm brown, softer than black
-  subtext: "#8A7463",    // A lighter, friendly brown for secondary text
+  // Backgrounds
+  background: "#FFF8EE",     // Warm cream, matches the soft bathroom tile warmth
+  backgroundAlt: "#E8F6FF",  // Light sky blue for outdoor/play screens
+  card: "#FFFDF7",           // Off-white card surface, slightly warm
 
-  // Brand & Action Colors
-  primary: "#2ECC71",    // Vibrant, grassy green for positive actions (e.g., Feed button)
-  accent: "#FF6B6B",     // A playful, energetic red from the ball and bandana
-  secondary: "#FFD166",  // A bright, sunny yellow for rewards, coins, and highlights
+  // Text
+  text: "#3B2A1A",           // Deep warm brown, like Shiba's outline strokes
+  subtext: "#8C6E52",        // Mid-tone earthy brown for secondary labels
 
-  // UI Element Colors
-  border: "#DDEAF2",     // A soft, subtle border color to complement the background
-  statBarBackground: "#E0E0E0", // A neutral background for the stat bars
+  // Brand & Actions
+  primary: "#F5A623",        // Shiba golden amber — the dominant fur color
+  primaryDark: "#D4861A",    // Deeper amber for pressed states / shadows
+  accent: "#E8533A",         // Coral red from the bandana and soap bottle
+  accentLight: "#FFCAB0",    // Pale salmon for accent backgrounds / tints
+
+  // Environment Colors
+  sky: "#3AAFE8",            // Bright outdoor sky blue from the play scene
+  grass: "#5BBF3E",          // Lush grass green from the yard
+  grassDark: "#3E9126",      // Deeper green for shadows on grass
+  sunshine: "#FFD93D",       // Sunny yellow from the smiling sun
+  foam: "#E8F4FF",           // Soapy bubble/foam near-white blue
+
+  // UI Elements
+  border: "#F0DFC8",         // Warm beige border, harmonizes with background
+  statBarBackground: "#EDE0D0", // Soft warm fill for stat bar tracks
+  shadow: "#C49A6C",         // Warm brown shadow tone
 };
 
 // ─── Font Families ──────────────────────────────────────────────────────────
@@ -26,23 +38,22 @@ export const fontFamily = {
 
 // ─── Semantic Font Sizes (pre-scaled) ────────────────────────────────────
 export const fontSize = {
-  small:      moderateScale(12),  // For tiny text, like version numbers in settings
-  body:       moderateScale(14),  // Standard text for descriptions or instructions
-  statLabel:  moderateScale(15),  // For the labels above the stat bars (Hunger, etc.)
-  button:     moderateScale(16),  // For the main action button text (Feed, Play)
-  title:      moderateScale(20),  // For screen titles (e.g., "Settings") or modal titles
-  heading:    moderateScale(28),  // For large on-screen headings (e.g., "My Pet")
-  display:    moderateScale(48),  // For large numbers like the coin count
+  small:      moderateScale(12),
+  body:       moderateScale(14),
+  statLabel:  moderateScale(15),
+  button:     moderateScale(16),
+  title:      moderateScale(20),
+  heading:    moderateScale(28),
+  display:    moderateScale(48),
 };
-
 
 // ─── Exporting the Final Theme Object & Types ───────────────────────────────
 export const theme = {
-  colors: colors,
-  fontFamily: fontFamily,
-  fontSize: fontSize,
+  colors,
+  fontFamily,
+  fontSize,
 };
 
-export type ThemeColors   = typeof colors;
-export type ThemeFontSize = typeof fontSize;
+export type ThemeColors     = typeof colors;
+export type ThemeFontSize   = typeof fontSize;
 export type ThemeFontFamily = typeof fontFamily;
