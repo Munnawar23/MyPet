@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { theme } from '@/styles/theme';
 
@@ -30,22 +36,49 @@ export default function Button({
   textStyle,
 }: ButtonProps) {
   const S = createStyles(variant, disabled);
+  const scaleVal = useSharedValue(1);
+  const pressStartTime = useRef(0);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleVal.value }],
+    };
+  });
+
+  const handlePressIn = () => {
+    if (disabled || loading) return;
+    pressStartTime.current = Date.now();
+    scaleVal.value = withSpring(0.8, { damping: 15, stiffness: 300 });
+  };
+
+  const handlePressOut = () => {
+    if (disabled || loading) return;
+    const duration = Date.now() - pressStartTime.current;
+    const remainingTime = Math.max(0, 150 - duration);
+    scaleVal.value = withDelay(
+      remainingTime,
+      withSpring(1, { damping: 15, stiffness: 300 })
+    );
+  };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={onPress}
-      disabled={disabled || loading}
-      style={[S.button, style]}
-    >
-      {loading ? (
-        <ActivityIndicator color={S.text.color as string} />
-      ) : (
-        <Text style={[S.text, textStyle]}>
-          {title}
-        </Text>
-      )}
-    </TouchableOpacity>
+    <Animated.View style={[animatedStyle, style]}>
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={onPress}
+        disabled={disabled || loading}
+        style={S.button}
+      >
+        {loading ? (
+          <ActivityIndicator color={S.text.color as string} />
+        ) : (
+          <Text style={[S.text, textStyle]}>
+            {title}
+          </Text>
+        )}
+      </Pressable>
+    </Animated.View>
   );
 }
 

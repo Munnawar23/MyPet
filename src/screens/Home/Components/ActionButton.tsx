@@ -1,10 +1,10 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
+import React, { useRef } from 'react';
+import { Pressable, Text, StyleSheet, Image } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSequence,
   withSpring,
+  withDelay,
 } from 'react-native-reanimated';
 import Sound from 'react-native-sound';
 import { scale, verticalScale } from 'react-native-size-matters';
@@ -21,6 +21,7 @@ interface ActionButtonProps {
 
 export default function ActionButton({ label, icon, color, textColor = theme.colors.card, onPress }: ActionButtonProps) {
   const scaleVal = useSharedValue(1);
+  const pressStartTime = useRef(0);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -28,21 +29,28 @@ export default function ActionButton({ label, icon, color, textColor = theme.col
     };
   });
 
-  const handlePress = () => {
-    // 1. Reanimated scale effect
-    scaleVal.value = withSequence(
-      withSpring(0.85, { damping: 10, stiffness: 300 }),
-      withSpring(1.05, { damping: 10, stiffness: 300 }),
-      withSpring(1, { damping: 12, stiffness: 200 })
-    );
+  const handlePressIn = () => {
+    pressStartTime.current = Date.now();
+    scaleVal.value = withSpring(0.8, { damping: 15, stiffness: 300 });
+  };
 
-    // 2. Haptic feedback
+  const handlePressOut = () => {
+    const duration = Date.now() - pressStartTime.current;
+    const remainingTime = Math.max(0, 150 - duration);
+    scaleVal.value = withDelay(
+      remainingTime,
+      withSpring(1, { damping: 15, stiffness: 300 })
+    );
+  };
+
+  const handlePress = () => {
+    // 1. Haptic feedback
     ReactNativeHapticFeedback.trigger('impactMedium', {
       enableVibrateFallback: true,
       ignoreAndroidSystemSettings: false,
     });
 
-    // 3. Sound effect (button.mp3)
+    // 2. Sound effect (button.mp3)
     const soundAsset = Image.resolveAssetSource(require('@/assets/sfx/button.mp3'));
     const clickSound = new Sound(soundAsset.uri, '', (error) => {
       if (!error) {
@@ -54,20 +62,21 @@ export default function ActionButton({ label, icon, color, textColor = theme.col
       }
     });
 
-    // 4. Trigger parent callback
+    // 3. Trigger parent callback
     onPress();
   };
 
   return (
     <Animated.View style={[styles.actionWrapper, animatedStyle]}>
-      <TouchableOpacity
-        activeOpacity={0.9}
+      <Pressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         onPress={handlePress}
         style={[styles.actionButton, { backgroundColor: color }]}
       >
         {icon}
         <Text style={[styles.actionLabel, { color: textColor }]}>{label}</Text>
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 }
