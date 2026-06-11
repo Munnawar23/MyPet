@@ -60,8 +60,8 @@ const petSlice = createSlice({
         state.cleanliness = Math.max(0, state.cleanliness - decayAmount);
 
         if (state.isSleeping) {
-          // Sleep gains 1% energy every 2 seconds = 0.5% per second
-          const energyGain = diffSeconds * 0.5;
+          // Sleep gains energy fast, approx 6.6% per second (takes ~15s to fill 100%)
+          const energyGain = diffSeconds * 6.6;
           state.energy = Math.min(100, state.energy + energyGain);
           
           // Auto wake up at 100%
