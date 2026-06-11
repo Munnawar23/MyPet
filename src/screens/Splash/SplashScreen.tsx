@@ -19,7 +19,7 @@ export default function SplashScreen() {
     <View style={S.container}>
       <View style={S.animationContainer}>
         <LottieView
-          source={require("@/assets/animations/boxing-cat.json")}
+          source={require("@/assets/animations/smart-cat.json")}
           autoPlay
           loop
           style={S.lottieAnimation}

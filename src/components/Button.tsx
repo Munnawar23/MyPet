@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { theme } from '@/styles/theme';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 interface ButtonProps {
   title: string;
@@ -61,12 +62,21 @@ export default function Button({
     );
   };
 
+  const handlePress = () => {
+    if (disabled || loading) return;
+    ReactNativeHapticFeedback.trigger('impactMedium', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+    onPress();
+  };
+
   return (
     <Animated.View style={[animatedStyle, style]}>
       <Pressable
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        onPress={onPress}
+        onPress={handlePress}
         disabled={disabled || loading}
         style={S.button}
       >
@@ -81,6 +91,7 @@ export default function Button({
     </Animated.View>
   );
 }
+
 
 const createStyles = (variant: 'primary' | 'accent' | 'secondary', disabled: boolean) => {
   const getBackgroundColor = () => {

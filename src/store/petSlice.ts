@@ -42,20 +42,22 @@ const petSlice = createSlice({
       state.cleanliness = Math.min(100, state.cleanliness + action.payload);
       state.lastUpdated = Date.now();
     },
+    incrementHappiness: (state, action: PayloadAction<number>) => {
+      state.happiness = Math.min(100, state.happiness + action.payload);
+      state.lastUpdated = Date.now();
+    },
     applyDecay: (state, action: PayloadAction<number>) => {
       const now = action.payload;
       const diffMs = now - state.lastUpdated;
       const diffSeconds = diffMs / 1000;
 
       if (diffSeconds > 0) {
-        // Hunger and Happiness decay 1% every 4 seconds
-        const generalDecayAmount = diffSeconds * 0.25;
-        // Cleanliness decays 1% every 6 seconds
-        const cleanlinessDecayAmount = diffSeconds * (1 / 6);
+        // All stats decay 1% every 10 seconds
+        const decayAmount = diffSeconds * 0.1;
 
-        state.hunger = Math.max(0, state.hunger - generalDecayAmount);
-        state.happiness = Math.max(0, state.happiness - generalDecayAmount);
-        state.cleanliness = Math.max(0, state.cleanliness - cleanlinessDecayAmount);
+        state.hunger = Math.max(0, state.hunger - decayAmount);
+        state.happiness = Math.max(0, state.happiness - decayAmount);
+        state.cleanliness = Math.max(0, state.cleanliness - decayAmount);
 
         if (state.isSleeping) {
           // Sleep gains 1% energy every 2 seconds = 0.5% per second
@@ -68,7 +70,7 @@ const petSlice = createSlice({
           }
         } else {
           // Decays normally when awake
-          state.energy = Math.max(0, state.energy - generalDecayAmount);
+          state.energy = Math.max(0, state.energy - decayAmount);
         }
         
         // Update the timestamp
@@ -79,5 +81,5 @@ const petSlice = createSlice({
   },
 });
 
-export const { feed, sleep, play, setIsSleeping, scrub, applyDecay, resetPet } = petSlice.actions;
+export const { feed, sleep, play, setIsSleeping, scrub, incrementHappiness, applyDecay, resetPet } = petSlice.actions;
 export default petSlice.reducer;

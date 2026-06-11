@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,25 +7,27 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/store/store';
-import { feed, sleep, play, applyDecay } from '@/store/petSlice';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LottieView from 'lottie-react-native';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { theme } from '@/styles/theme';
 import { Settings, Utensils, Moon, Smile as SmileIcon, Bath } from 'lucide-react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/store/store';
+import { feed, sleep, play, applyDecay } from '@/store/petSlice';
 import StatBar from './Components/StatBar';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import ActionButton from './Components/ActionButton';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/RootNavigator';
+import CustomModal from '@/components/CustomModal';
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>();
   const insets = useSafeAreaInsets();
   const { hunger, energy, happiness, isSleeping, cleanliness } = useSelector((state: RootState) => state.pet);
+  const [isSleepingModalVisible, setIsSleepingModalVisible] = useState(false);
 
   // Apply decay on mount and set up an interval to decay over time
   useEffect(() => {
@@ -47,15 +49,19 @@ export default function HomeScreen() {
     });
   };
 
-  const handleAction = (action: 'feed' | 'sleep' | 'play') => {
+  const handleAction = (action: 'play' | 'sleep' | 'bath') => {
+    if (isSleeping && (action === 'play' || action === 'bath')) {
+      setIsSleepingModalVisible(true);
+      return;
+    }
     switch (action) {
-      case 'feed':
-        dispatch(feed());
+      case 'play':
+        navigation.navigate('Playing');
         break;
       case 'sleep':
         navigation.navigate('Sleeping');
         break;
-      case 'play':
+      case 'bath':
         navigation.navigate('Bathing');
         break;
     }
@@ -71,10 +77,10 @@ export default function HomeScreen() {
         {/* Top HUD */}
         <View style={styles.topHUD}>
           <StatBar
-            hunger={hunger}
+            happiness={happiness}
             energy={energy}
             cleanliness={cleanliness}
-            hungerIcon={<Utensils size={20} color={theme.colors.text} />}
+            happinessIcon={<SmileIcon size={20} color={theme.colors.text} />}
             energyIcon={<Moon size={20} color={theme.colors.text} />}
             cleanlinessIcon={<Bath size={20} color={theme.colors.text} />}
           />
@@ -83,11 +89,11 @@ export default function HomeScreen() {
         {/* Center: Pet Animation */}
         <View style={styles.petContainer}>
           {isSleeping ? (
-            <Text style={styles.sleepingText}>Dog is sleeping</Text>
+            <Text style={styles.sleepingText}>Pet is sleeping</Text>
           ) : (
             <LottieView
               source={
-                hunger > 80 && energy > 80 && happiness > 80
+                happiness > 70 && energy > 70 && cleanliness > 70
                   ? require('@/assets/animations/cat.json')
                   : require('@/assets/animations/angry-cat.json')
               }
@@ -101,10 +107,10 @@ export default function HomeScreen() {
         {/* Bottom Actions */}
         <View style={styles.actionsContainer}>
           <ActionButton
-            label="Eat"
-            icon={<Utensils size={24} color={theme.colors.card} />}
+            label="Play"
+            icon={<SmileIcon size={24} color={theme.colors.card} />}
             color={theme.colors.accent}
-            onPress={() => handleAction('feed')}
+            onPress={() => handleAction('play')}
           />
           <ActionButton
             label="Sleep"
@@ -117,10 +123,24 @@ export default function HomeScreen() {
             label="Bath"
             icon={<Bath size={24} color={theme.colors.card} />}
             color={theme.colors.sky}
-            onPress={() => handleAction('play')}
+            onPress={() => handleAction('bath')}
           />
         </View>
       </View>
+      <CustomModal
+        visible={isSleepingModalVisible}
+        onClose={() => setIsSleepingModalVisible(false)}
+        title="SHHH... 💤"
+        message="Your pet is sleeping peacefully right now! You cannot play or bathe it until it wakes up."
+        buttonTitle="Go to Bedroom"
+        onButtonPress={() => {
+          setIsSleepingModalVisible(false);
+          navigation.navigate('Sleeping');
+        }}
+        secondaryButtonTitle="Close"
+        onSecondaryButtonPress={() => setIsSleepingModalVisible(false)}
+        icon={<Moon size={scale(36)} color={theme.colors.sunshine} fill={theme.colors.sunshine} />}
+      />
     </ImageBackground>
   );
 }

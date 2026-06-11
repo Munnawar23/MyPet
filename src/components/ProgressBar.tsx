@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { scale, verticalScale } from 'react-native-size-matters';
 import { theme } from '@/styles/theme';
 import { ChevronLeft } from 'lucide-react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 interface ProgressBarProps {
   progress: number;
@@ -17,11 +18,21 @@ export default function ProgressBar({
   color = theme.colors.primary,
   onBack,
 }: ProgressBarProps) {
+  const handleBackPress = () => {
+    ReactNativeHapticFeedback.trigger('impactMedium', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+    if (onBack) {
+      onBack();
+    }
+  };
+
   return (
     <View style={styles.progressWrapper}>
       {onBack && (
         <TouchableOpacity
-          onPress={onBack}
+          onPress={handleBackPress}
           style={styles.backButton}
           activeOpacity={0.7}
         >

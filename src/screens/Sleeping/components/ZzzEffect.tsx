@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
   zzzText: {
     position: 'absolute',
     fontFamily: theme.fontFamily.heading,
-    color: theme.colors.sunshine,
-    textShadowColor: theme.colors.text,
+    color: theme.colors.text,
+    textShadowColor: '#FFFFFF',
     textShadowOffset: { width: 1.5, height: 1.5 },
     textShadowRadius: 0,
   },

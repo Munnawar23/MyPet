@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
+  Vibration,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -17,11 +18,14 @@ import { wp, hp } from '@/helpers/dimensionHelpers';
 import Button from '@/components/Button';
 import ProgressBar from '@/components/ProgressBar';
 import { RootStackParamList } from '@/navigation/RootNavigator';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, Sparkles } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { setIsSleeping, applyDecay } from '@/store/petSlice';
 import ZzzEffect from './components/ZzzEffect';
+import CustomModal from '@/components/CustomModal';
+import Sound from 'react-native-sound';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Sleeping'>;
 
@@ -33,10 +37,28 @@ export default function SleepingScreen() {
   // Select current stats from Redux
   const { hunger, energy, happiness, isSleeping } = useSelector((state: RootState) => state.pet);
   
-  // Determine if dog is angry (same logic as Home Screen)
+  // Determine if pet is angry (same logic as Home Screen)
   const isAngry = !(hunger > 80 && energy > 80 && happiness > 80);
 
   const progress = energy;
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  const playCheerSound = () => {
+    try {
+      const soundAsset = Image.resolveAssetSource(require('@/assets/sfx/cheer.mp3'));
+      const sound = new Sound(soundAsset.uri, '', (error) => {
+        if (error) {
+          console.warn('Failed to load cheer sound:', error);
+          return;
+        }
+        sound.play(() => {
+          sound.release();
+        });
+      });
+    } catch (e) {
+      console.warn('Error playing cheer sound:', e);
+    }
+  };
 
   // Sync / decay loop while screen is active
   useEffect(() => {
@@ -48,6 +70,22 @@ export default function SleepingScreen() {
 
     return () => clearInterval(interval);
   }, [dispatch]);
+
+  // Listen for energy reaching 100% to wake up and show modal
+  useEffect(() => {
+    if (progress >= 99.9 && !showCelebration) {
+      setShowCelebration(true);
+      if (isSleeping) {
+        dispatch(setIsSleeping(false));
+      }
+      playCheerSound();
+      ReactNativeHapticFeedback.trigger('notificationSuccess', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+      Vibration.vibrate(500);
+    }
+  }, [progress, isSleeping, dispatch, showCelebration]);
 
   const handleToggleSleep = () => {
     dispatch(setIsSleeping(!isSleeping));
@@ -68,7 +106,7 @@ export default function SleepingScreen() {
       <View style={S.container}>
         {/* Progress Bar Container at the Top */}
         <View style={S.progressContainer}>
-          <ProgressBar progress={progress} label="Sleep Progress" onBack={handleBack} />
+          <ProgressBar progress={progress} label="Sleep Progress" color={theme.colors.sunshine} onBack={handleBack} />
         </View>
 
         {/* Main Pet Visual Area at the Bottom */}
@@ -105,6 +143,22 @@ export default function SleepingScreen() {
           />
         </View>
       </View>
+      <CustomModal
+        visible={showCelebration}
+        onClose={() => {
+          setShowCelebration(false);
+          navigation.navigate('Home');
+        }}
+        title="CONGRATULATIONS! 🎉"
+        message="Congratulations, it's done! Your pet is fully rested!"
+        buttonTitle="Okay"
+        onButtonPress={() => {
+          setShowCelebration(false);
+          navigation.navigate('Home');
+        }}
+        showCloseButton={false}
+        icon={<Sparkles size={scale(36)} color={theme.colors.sunshine} fill={theme.colors.sunshine} />}
+      />
     </ImageBackground>
   );
 }

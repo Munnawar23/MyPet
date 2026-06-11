@@ -43,25 +43,25 @@ const MiniProgressBar = ({ progress, color, icon }: StatProps) => {
 };
 
 interface StatBarProps {
-  hunger: number;
+  happiness: number;
   energy: number;
   cleanliness: number;
-  hungerIcon: React.ReactNode;
+  happinessIcon: React.ReactNode;
   energyIcon: React.ReactNode;
   cleanlinessIcon: React.ReactNode;
 }
 
 export default function StatBar({
-  hunger,
+  happiness,
   energy,
   cleanliness,
-  hungerIcon,
+  happinessIcon,
   energyIcon,
   cleanlinessIcon,
 }: StatBarProps) {
   return (
     <View style={styles.container}>
-      <MiniProgressBar progress={hunger} color={theme.colors.accent} icon={hungerIcon} />
+      <MiniProgressBar progress={happiness} color={theme.colors.accent} icon={happinessIcon} />
       <MiniProgressBar progress={energy} color={theme.colors.sunshine} icon={energyIcon} />
       <MiniProgressBar progress={cleanliness} color={theme.colors.sky} icon={cleanlinessIcon} />
     </View>

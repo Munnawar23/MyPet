@@ -60,12 +60,6 @@ export default function OnboardingScreen() {
       return;
     }
 
-    // Trigger medium haptics
-    ReactNativeHapticFeedback.trigger('impactMedium', {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    });
-
     // Play click sound
     const soundAsset = Image.resolveAssetSource(require('@/assets/sfx/button.mp3'));
     const clickSound = new Sound(soundAsset.uri, '', (error) => {

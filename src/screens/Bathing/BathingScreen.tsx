@@ -6,6 +6,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Image,
+  Vibration,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -15,6 +16,7 @@ import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
 import { scale, verticalScale } from 'react-native-size-matters';
 import Sound from 'react-native-sound';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 import { theme } from '@/styles/theme';
 import { wp, hp } from '@/helpers/dimensionHelpers';
@@ -26,7 +28,7 @@ import { RootState } from '@/store/store';
 import { play, applyDecay, scrub } from '@/store/petSlice';
 import { Sparkles } from 'lucide-react-native';
 import FoamCanvas, { FoamCanvasRef } from './components/FoamCanvas';
-import CelebrationOverlay from './components/CelebrationOverlay';
+import CustomModal from '@/components/CustomModal';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Bathing'>;
 
@@ -44,6 +46,7 @@ export default function BathingScreen() {
   const progress = cleanliness;
   const [soapPos, setSoapPos] = useState({ x: wp(80), y: hp(45) });
   const [isAutoWashing, setIsAutoWashing] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Sound helper functions
   const startBathSound = () => {
@@ -149,18 +152,26 @@ export default function BathingScreen() {
 
   // Listen for cleanliness reaching 100% to stop auto wash
   useEffect(() => {
-    if (progress >= 99.9 && isAutoWashing) {
-      if (autoWashIntervalRef.current) {
-        clearInterval(autoWashIntervalRef.current);
-        autoWashIntervalRef.current = null;
+    if (progress >= 99.9 && !showCelebration) {
+      setShowCelebration(true);
+      if (isAutoWashing) {
+        if (autoWashIntervalRef.current) {
+          clearInterval(autoWashIntervalRef.current);
+          autoWashIntervalRef.current = null;
+        }
+        setIsAutoWashing(false);
+        foamCanvasRef.current?.spawnWater(false);
+        stopBathSound();
       }
-      setIsAutoWashing(false);
-      foamCanvasRef.current?.spawnWater(false);
-      stopBathSound();
       playCheerSound();
+      ReactNativeHapticFeedback.trigger('notificationSuccess', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+      Vibration.vibrate(500);
       dispatch(play()); // boost happiness on complete
     }
-  }, [progress, isAutoWashing, dispatch]);
+  }, [progress, isAutoWashing, dispatch, showCelebration]);
 
   const handleBack = () => {
     navigation.goBack();
@@ -190,7 +201,13 @@ export default function BathingScreen() {
           <View style={S.bathArea}>
             {/* Lottie Animation of Pet - wrap in TouchableOpacity for click to wash */}
             <TouchableOpacity
-              onPress={handleAutoWash}
+              onPress={() => {
+                ReactNativeHapticFeedback.trigger('impactMedium', {
+                  enableVibrateFallback: true,
+                  ignoreAndroidSystemSettings: false,
+                });
+                handleAutoWash();
+              }}
               activeOpacity={0.9}
               style={S.petContainer}
               disabled={isAutoWashing || progress >= 99.9}
@@ -225,9 +242,6 @@ export default function BathingScreen() {
               <View style={[S.soapBubble, { top: -4, left: 10 }]} />
               <View style={[S.soapBubble, { bottom: -2, right: 8, width: 8, height: 8 }]} />
             </View>
-
-            {/* Reanimated Floating Emojis and Celebration Badge Pop-up */}
-            {progress >= 99.9 && <CelebrationOverlay />}
           </View>
         </GestureDetector>
 
@@ -242,6 +256,22 @@ export default function BathingScreen() {
           />
         </View>
       </View>
+      <CustomModal
+        visible={showCelebration}
+        onClose={() => {
+          setShowCelebration(false);
+          navigation.navigate('Home');
+        }}
+        title="CONGRATULATIONS! 🎉"
+        message="Congratulations, it's done! Your pet is squeaky clean!"
+        buttonTitle="Okay"
+        onButtonPress={() => {
+          setShowCelebration(false);
+          navigation.navigate('Home');
+        }}
+        showCloseButton={false}
+        icon={<Sparkles size={scale(36)} color={theme.colors.sunshine} fill={theme.colors.sunshine} />}
+      />
     </ImageBackground>
   );
 }
