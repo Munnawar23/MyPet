@@ -55,38 +55,13 @@ export default function PlayingScreen() {
   // Clean up sounds and intervals on unmount
   useEffect(() => {
     return () => {
-      stopPlaySound();
       if (playIntervalRef.current) {
         clearInterval(playIntervalRef.current);
       }
     };
   }, []);
 
-  const startPlaySound = () => {
-    stopPlaySound();
-    try {
-      const soundAsset = Image.resolveAssetSource(require('@/assets/sfx/bath.mp3'));
-      const sound = new Sound(soundAsset.uri, '', (error) => {
-        if (error) {
-          console.warn('Failed to load play loop sound:', error);
-          return;
-        }
-        playSoundRef.current = sound;
-        sound.setNumberOfLoops(-1);
-        sound.play();
-      });
-    } catch (e) {
-      console.warn('Error playing play loop sound:', e);
-    }
-  };
 
-  const stopPlaySound = () => {
-    if (playSoundRef.current) {
-      playSoundRef.current.stop();
-      playSoundRef.current.release();
-      playSoundRef.current = null;
-    }
-  };
 
   const playCheerSound = () => {
     try {
@@ -115,11 +90,9 @@ export default function PlayingScreen() {
         playIntervalRef.current = null;
       }
       setIsPlaying(false);
-      stopPlaySound();
     } else {
       // Start Play
       setIsPlaying(true);
-      startPlaySound();
 
       playIntervalRef.current = setInterval(() => {
         dispatch(incrementHappiness(1)); // Increase happiness over time
@@ -137,7 +110,6 @@ export default function PlayingScreen() {
           playIntervalRef.current = null;
         }
         setIsPlaying(false);
-        stopPlaySound();
       }
       playCheerSound();
       ReactNativeHapticFeedback.trigger('notificationSuccess', {
@@ -149,7 +121,6 @@ export default function PlayingScreen() {
   }, [progress, isPlaying, showCelebration]);
 
   const handleBack = () => {
-    stopPlaySound();
     if (playIntervalRef.current) {
       clearInterval(playIntervalRef.current);
     }
@@ -206,7 +177,6 @@ export default function PlayingScreen() {
         visible={showCelebration}
         onClose={() => {
           setShowCelebration(false);
-          navigation.navigate('Home');
         }}
         title="CONGRATULATIONS! 🎉"
         message="Congratulations, it's done! Your pet is happy and energized!"

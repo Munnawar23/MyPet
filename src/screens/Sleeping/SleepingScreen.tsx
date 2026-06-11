@@ -147,7 +147,6 @@ export default function SleepingScreen() {
         visible={showCelebration}
         onClose={() => {
           setShowCelebration(false);
-          navigation.navigate('Home');
         }}
         title="CONGRATULATIONS! 🎉"
         message="Congratulations, it's done! Your pet is fully rested!"

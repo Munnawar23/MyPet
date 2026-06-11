@@ -260,7 +260,6 @@ export default function BathingScreen() {
         visible={showCelebration}
         onClose={() => {
           setShowCelebration(false);
-          navigation.navigate('Home');
         }}
         title="CONGRATULATIONS! 🎉"
         message="Congratulations, it's done! Your pet is squeaky clean!"
